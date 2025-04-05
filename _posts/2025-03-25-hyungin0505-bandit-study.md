@@ -108,8 +108,6 @@ head ./-
 `human-readable` 파일이니 `cat`으로 확인하면 password를 찾을 수 있다
 
 ---
-<!--
-
 
 ## Level 5 ~ Level 7
 
@@ -182,6 +180,8 @@ cat data.txt | grep millionth
 ```
 
 ---
+
+<!--
 
 ## Level 8 ~ Level 13
 
