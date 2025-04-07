@@ -52,7 +52,7 @@
 ---
 title: "제목"
 excerpt: "설명"
-author: { Nickname } # 위에서 등록한 author nickname
+author: Nickname # 위에서 등록한 author nickname
 
 categories: # 카테고리 설정
     - categories1

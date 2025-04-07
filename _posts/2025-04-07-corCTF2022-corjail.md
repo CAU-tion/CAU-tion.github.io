@@ -1,7 +1,7 @@
 ---
 title: "corCTF2022 corjail"
 excerpt: "corCTF2022에서 출제된 corjail의 문제 라업입니다."
-author: { uniguri } # 위에서 등록한 author nickname
+author: uniguri # 위에서 등록한 author nickname
 
 categories: # 카테고리 설정
     - pwnable
