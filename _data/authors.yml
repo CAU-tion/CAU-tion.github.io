@@ -47,3 +47,15 @@ kredsya:
     - label: "Chess.com"
       icon: "fas fa-fw fa-chess"
       url: "https://www.chess.com/member/kredsya"
+
+uniguri:
+  name: "Uniguri"
+  bio: "CAUtion Member"
+  avatar: "/assets/img/avatars/uniguri.jpg"
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/Uniguri"
+    - label: "Website"
+      icon: "fas fa-fw fa-link"
+      url: "https://uniguri.com"
