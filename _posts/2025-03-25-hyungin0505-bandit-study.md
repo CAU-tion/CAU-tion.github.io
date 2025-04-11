@@ -181,8 +181,6 @@ cat data.txt | grep millionth
 
 ---
 
-<!--
-
 ## Level 8 ~ Level 13
 
 ### Level 8 -> 9
@@ -331,6 +329,8 @@ ssh -i ./sshkey.private -p 2220 bandit14@localhost
 
 `sshkey.private` 파일이 주어지는데 이를 이용해서 `ssh`에 접근할 수 있다
 
+<!--
+
 ---
 
 ## Level 14 ~ Level 17
@@ -352,6 +352,8 @@ openssl s_client -connect localhost:30001
 ```
 
 30001 포트와 SSL/TLS 암호화를 사용하여 통신할 수 있다
+-->
 
-
+<!--
+bundle exec jekyll serve --livereload 
 -->
