@@ -327,9 +327,16 @@ ssh -i ./sshkey.private -p 2220 bandit14@localhost
 
 ![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdAsBYc%2FbtsMRcTid8E%2FHe3nfNUtBxJXAb8oV92d3k%2Fimg.png)
 
-`sshkey.private` 파일이 주어지는데 이를 이용해서 `ssh`에 접근할 수 있다
+`sshkey.private` 파일이 주어지는데 이를 이용해서 `ssh`에 접근할 수 있다  
+-i 옵션으로 사용할 개인키(비공개키) 경로를 지정할 수 있다  
 
-<!--
+OpenSSH 키는 공개키(public key), 비공개키(private key) 두 가지 방식의 인증 키가 있다  
+서버는 공개키를 가지고, 클라이언트는 비공개키를 이용해 서버에 접속 요청을 하면 서버가 비공개 키를 검증하여 접속을 허용할지 말지 결정한다  
+공개키는 서버의 `.ssh/authorized_keys`에 주로 위치한다  
+
+비밀번호보다 키를 사용하는 것이 일반적으로 안전하다고 여겨진다  
+RSA키, DSA키 모두 사용할 수 있지만 DSA키는 RSA키보다 보안에 취약해 RSA키를 사용하는 것을 권장한다  
+
 
 ---
 
@@ -339,7 +346,7 @@ ssh -i ./sshkey.private -p 2220 bandit14@localhost
 
 ![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbvHgxE%2FbtsMPxxPo8D%2F6SFRg3TNFyAwm5ox119Z51%2Fimg.png)
 
-netcat 명령어를 이용해서 30000포트에 이전 password를 보내면 응답으로 다음 Level의 password를 얻을 수 있다
+netcat 명령어를 이용해서 30000포트에 이전 password를 보내면 응답으로 다음 Level의 password를 얻을 수 있다  
 
 ---
 
@@ -351,8 +358,76 @@ netcat 명령어를 이용해서 30000포트에 이전 password를 보내면 응
 openssl s_client -connect localhost:30001
 ```
 
-30001 포트와 SSL/TLS 암호화를 사용하여 통신할 수 있다
--->
+30001 포트와 SSL/TLS 암호화를 사용하여 통신할 수 있다  
+
+SSL/TLS 암호화를 사용하는 대표적인 프로토콜이 HTTPS이다  
+SSL(Secure Sockets Layer)은 HTTP 암호화 프로토콜로 개발되었지만 다양한 취약점으로 사용이 중단되었다  
+TLS(Transport Layer Security)는 SSL의 후속 버전으로 인터넷으로 주고받는 데이터를 암호화해주는 보안 프로토콜이다  
+사실상 SSL/TLS 암호화는 사실상 TLS이다  
+
+TLS 통신 절차는 크게 핸드쉐이크와 데이터 전송으로 이루어진다  
+1. 핸드쉐이크
+    - Client Hello  
+    클라이언트가 서버에게 TLS를 사용하겠다고 알리는 과정이다
+    가능한 암호화 방식, TLS 버전, 난수 등을 전달한다
+    - Server Hello  
+    클라이언트에 대한 응답으로 클라이언트에게 TLS 통신에 필요한 공개키를 전달한다
+    - 인증서 검증  
+    클라이언트는 CA 서명 확인서를 통해 서버 인증서가 유효한지 확인한다
+    - 대칭키 생성  
+    클라이언트가 대칭키(세션키)를 만들고 서버의 공개 키로 암호화해서 전송한다
+    - 대칭키 복호화  
+    서버는 대칭키를 복호화하여 저장하고 대칭키는 서버와 클라이언트만 알고 있게 된다
+2. 데이터 전송
+    - 공유된 대칭키(세션키)를 사용하여 데이터를 암호화하여 주고받을 수 있다
+
+---
+
+### Level 16 -> 17
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbU64Hf%2FbtsNIdwnlGF%2F4iurEssFLguLOMUYkyPdtK%2Fimg.png)
+`nmap` 명령어를 사용해 포트 스캔을 할 수 있다  
+-p 옵션을 사용해 스캔할 포트 범위를 설정할 수 있다  
+
+`nmap`은 Network Mapper의 약자로, 서비스나 호스트에 패킷을 보내 응답을 분석하는데 활용된다  
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fcmbo2w%2FbtsNGW3pskB%2FmMr1C6ng3PS6i2Uaoi6yq0%2Fimg.png)
+포트 스캔으로 스캔한 포트 중에 31518, 31790 포트에서만 SSL/TLS 암호화 프로토콜을 사용하는 것을 확인할 수 있다  
+(`s_client`를 사용하면 SSL/TLS 암호화 프로토콜로 통신을 시도한다)  
+
+SSL/TLS 프로토콜로 통신하는 포트 중에 이전 패스워드를 입력하면 반환값을 주는 포트는 31790 포트 뿐이다  
+여기에 -quiet 옵션을 붙인 후 이전 패스워드를 전송하면 Correct라는 문자열과 함께 RSA 비공개키를 보내준다  
+-quiet 옵션을 사용하면 TLS 연결 이후 핸드쉐이크 메세지, 메타 정보나 디버그 정보는 숨기고 오로지 입출력 창으로만 작동하여 `netcat`처럼 사용할 수 있도록 해준다  
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FkyKyL%2FbtsNG0dID4L%2F9gg10kKvgJrbakFLh9Qnt1%2Fimg.png)
+받은 RSA 비공개키 문자열을 파일로 저장한 후 키 파일로 변환한다  
+`chmod`로 키 파일의 권한을 600(-wx------)처럼 읽을 수 없게 설정해주어야 키 파일로 변환할 수 있다  
+
+-p 옵션 사용해서 비밀번호를 바꾸거나 제거할 수 있다
+-f 옵션으로 변환할 파일을 지정하고 -m 옵션으로 PKCS8을 주어 OpenSSH에 호환되는 키 파일로 변환한다  
+
+`PKCS8`은 Private-Key Cryptography Standards #8 의 약자로 RSA, DSA, EC 등 다양한 개인 키 형식을 표준화된 방식으로 표현한다  
+(OpenSSH의 기본 키 형식인 `BEGIN OPENSSH PRIVATE KEY`와는 다르다 (`PKCS8`->`BEGIN (RSA) PRIVATE KEY`))  
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FKSWiV%2FbtsNG3avAnR%2FVKRAZ0GtcBYNVaSBCNturK%2Fimg.png)
+변환한 키 파일을 사용해서 다음 단계로 넘어갈 수 있다  
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fccdj5Y%2FbtsNHOQ9eNQ%2FkuqOeszCEHnTaG98MPvTB0%2Fimg.png)
+이전 단계처럼 패스워드를 저장하고 싶다면 `/etc/bandit_pass` 경로에서 `bandit17`을 읽어 패스워드를 얻을 수 있다  
+(해당 경로에는 모든 스테이지의 패스워드가 저장되어 있는데 해당 스테이지에 대응하는 사용자만 읽을 권한이 있다)  
+
+---
+
+### Level 17 -> 18
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbLDbTY%2FbtsNG0Y9q7u%2F1iBFSQpfBViWGmsPyBRKc1%2Fimg.png)
+`diff` 명령어를 사용하여 두 파일 또는 문자열을 비교해 차이점들을 출력할 수 있다  
+문제 설명에서도 알 수 있듯이 패스워드는 `passwords.new`에 저장되어 있다  
+
+![Image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbyKHKs%2FbtsNGL840wG%2FjmGAKPQ1w7KeDhsF29Bl9K%2Fimg.png)  
+해당 패스워드를 사용할 경우 `Byebye!` 문자열과 함께 세션이 종료되는데, 이는 Level 18의 문제이고 올바른 패스워드로 로그인된 상황이다  
+
+
 
 <!--
 bundle exec jekyll serve --livereload 
